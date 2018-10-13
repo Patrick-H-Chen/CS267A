@@ -30,6 +30,7 @@ def pruner(claim,var,val):
           result.append(clause)
   return result
 
+## This function returns what variables are left in CNF ##
 def variable_parser(claim):
   var_map = {}
   for clause in claim:
@@ -41,6 +42,8 @@ def variable_parser(claim):
       if tok not in var_map:
         var_map[tok] = 0
   return var_map
+
+
 
 def DPLL(assignment,claim):
   var_map = variable_parser(claim)
@@ -54,8 +57,7 @@ def DPLL(assignment,claim):
        assignment[variables[0]] = 0
     else:
        assignment[variables[0]] = 1
-    print(assignment) 
-    return True
+    return True,assignment
   else:
     assign1 = assignment.copy()
     assign1[the_var] = 0
@@ -63,14 +65,10 @@ def DPLL(assignment,claim):
     assign2 = assignment.copy()
     assign2[the_var] = 1
     claim2 = pruner(copy.deepcopy(claim),the_var,1)
-    #print("THE CLAIM",claim,"THE_VAR",the_var,"CLAIM1",claim1,"CLAIM2",claim2)
   if(len(claim1) == 0):
-    print(assign1)
-    return True
+    return True,assign1
   elif(len(claim2) == 0):
-    print(assign2)
-    return True
-
+    return True,assign2
   flag_1 = True
   flag_2 = True
   for c in claim1:
@@ -90,7 +88,22 @@ def SAT_solver(claim):
   if(len(variables) == 0):
     return True
   assignment_map = {}
-  return DPLL(assignment_map,copy.deepcopy(claim))
+  returned = DPLL(assignment_map,copy.deepcopy(claim))
+  if(isinstance(returned,(tuple,))):  
+    assign = returned[1]
+    for v in variables:
+      if v not in assign:
+        assign[v] = 0
+    print(assign)
+    return True
+  else:
+    return False
+
+
+
+
+
+
 
 # PROBLEM SET
 claim1 = [["a","b","nc"],["a","nd"]]
@@ -99,9 +112,11 @@ claim2 = [["x","y","z"],["x","y","nz"],["x","ny","z"],["x","ny","nz"],["nx","y",
 # EXTRT TEST
 claim3 = [["x","y"],["x","nu","w"],["nx","nu","w","z"]]
 claim4 = [["x","y"],["y","nz","w"],["nx","ny"],["nx","nz","nw"],["x"]]
+claim5 = [["nx","ny","nz"],["x"]]
 
 print(SAT_solver(claim1))
 print(SAT_solver(claim2))
 
 #print(SAT_solver(claim3))
 #print(SAT_solver(claim4))
+#print(SAT_solver(claim5))
